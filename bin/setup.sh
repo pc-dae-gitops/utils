@@ -195,11 +195,6 @@ if [ "$wait" == "1" ]; then
 fi
 export CLUSTER_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
 
-if [ "$flamingo" == "true" ]; then
-  cp $(local_or_global resources/flamingo/)* mgmt-cluster/flux/
-  git add mgmt-cluster/flux
-fi
-
 export AWS_ACCOUNT_ID="none"
 if [ "$aws" == "true" ]; then
   export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
