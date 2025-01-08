@@ -1,0 +1,7 @@
+**/*.key
+.DS_Store
+
+.terraform
+*.tfstate*
+.terraform.lock.hcl
+build/**
