@@ -54,7 +54,7 @@ source $SCRIPT_DIR/envs.sh
 if [ "$aws" == "true" ]; then
   aws-secrets.sh $debug_str $script_tls_skip --aws-dir ${aws_dir} --aws-credentials ${aws_credentials}
 fi
-if [ "$azure" == "true" ]; then
+if [ "${azure:-}" == "true" ]; then
   azure-secrets.sh $debug_str
 fi
 

@@ -316,7 +316,7 @@ else
   fi
 fi
 
-if [ "$azure_capi" == "true" ]; then
+if [ "${azure_capi:-}" == "true" ]; then
   cp $(local_or_global resources/capi/providers/azure/)* mgmt-cluster/flux/
   git add mgmt-cluster/flux/capz.yaml
 
@@ -377,7 +377,7 @@ set +e
 vault-oidc-config.sh
 set -e
 
-if [ "$aws" == "true" ]; then
+if [ "${aws:-}" == "true" ]; then
   if [ "$wait" == "1" ]; then
     echo "Waiting for aws to be applied"
     kubectl wait --timeout=5m --for=condition=Ready kustomization/aws -n flux-system
@@ -385,7 +385,7 @@ if [ "$aws" == "true" ]; then
   ${config_dir}/terraform/bin/tf-apply.sh $debug_str aws-key-pair
 fi
 
-if [ "$ecr_repos" == "true" ]; then
+if [ "${ecr_repos:-}" == "true" ]; then
   cp $(local_or_global resources/ecr/flux.yaml) mgmt-cluster/flux/ecr.yaml
   git add mgmt-cluster/flux/ecr.yaml
 
