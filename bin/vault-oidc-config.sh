@@ -46,7 +46,6 @@ source resources/github-secrets.sh
 export VAULT_ADDR="https://vault.${local_dns}"
 export VAULT_TOKEN="$(jq -r '.root_token' resources/.vault-init.json)"
 export DEX_URL="https://dex.${local_dns}"
-export GITHUB_AUTH_ORG=pc-gitops
 
 set +e
 
@@ -67,7 +66,9 @@ vault write $tls_skip auth/oidc/role/default \
   token_ttl="12h" \
   token_policies="default"
 
-vault write $tls_skip identity/group name=github-admin policies=admin type=external
+vault policy write oidc-policy $(local_or_global resources/vault-policy.hcl)
+
+vault write $tls_skip identity/group name=github-admin policies=oidc-policy type=external
 
 github_admin_id=$(vault read identity/group/name/github-admin --format=json | jq -r '.data.id')
 accessor_id=$(vault auth $tls_skip list --format=json | jq -r '.["oidc/"].accessor')

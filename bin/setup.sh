@@ -253,14 +253,15 @@ sleep 5
 vault-init.sh $debug_str --tls-skip
 vault-unseal.sh $debug_str --tls-skip
 
-kubectl apply -f - <<EOF
+export VAULT_TOKEN="$(jq -r '.root_token' resources/.vault-init.json)"
+  kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
   name: vault-token
   namespace: vault
 data:
-  vault_token: $(jq -r '.root_token' resources/.vault-init.json | base64 ${b64w})
+  vault_token: $(echo -n "$VAULT_TOKEN" | base64 ${b64w})
 EOF
 
 set +e
@@ -374,7 +375,7 @@ fi
 kubectl wait --timeout=5m --for=condition=Ready kustomization/dex -n flux-system
 
 set +e
-vault-oidc-config.sh
+vault-oidc-config.sh $debug_str
 set -e
 
 if [ "${aws:-}" == "true" ]; then

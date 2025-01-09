@@ -46,7 +46,6 @@ source resources/github-secrets.sh
 export VAULT_ADDR="https://vault.${local_dns}"
 export VAULT_TOKEN="$(jq -r '.root_token' resources/.vault-init.json)"
 export DEX_URL="https://dex.${local_dns}"
-export GITHUB_AUTH_ORG=ww-gitops
 
 set +e
 

@@ -50,31 +50,6 @@ for ns in $(kubectl get ns -o custom-columns=":metadata.name"); do
   done
 done
 
-if [ $delete_tfs -eq 1 ]; then
-
-  for ns in $(kubectl get ns -o custom-columns=":metadata.name"); do
-    for tf in $(kubectl get terraforms.infra.contrib.fluxcd.io -n $ns -o custom-columns=":metadata.name"); do
-      if [[ ( $tf == "aws-dynamo-table" ||  $tf == "aws-s3-bucket" ) && $ns == "flux-system" ]]; then
-        continue
-      fi
-      kubectl delete terraforms.infra.contrib.fluxcd.io -n $ns $tf &
-    done
-  done
-
-  # Wait for terraform objects to be deleted
-  while ( true ); do
-    echo "Waiting for terraform objects to be deleted"
-    kubectl get terraforms.infra.contrib.fluxcd.io -A -o custom-columns=":metadata.namespace,:metadata.name" | grep -v "flux-system.*aws-dynamo-table" | grep -v "flux-system.*aws-s3-bucket" > /tmp/tf.list
-    objects="$(wc -l /tmp/tf.list | awk '{print $1}')"
-    if [[  $objects -eq 1 ]]; then
-      break
-    fi
-    echo "${objects} terraform objects still exist"
-    cat /tmp/tf.list
-    sleep 5
-  done
-fi
-
 cluster_name=$(kubectl get cm -n flux-system cluster-config -o jsonpath='{.data.mgmtClusterName}')
 
 if [ "$aws" == "true" ]; then
