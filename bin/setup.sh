@@ -119,7 +119,7 @@ else
   kustomize build ${config_dir}/mgmt-cluster/addons/flux | kubectl apply -f-
   source resources/github-secrets.sh
 
-  # Re create a secret for flux to use to access the git repo backing the cluster, using read only token
+  # Create a secret for flux to use to access the git repo backing the cluster, using write token - write access needed by image automation
 
   kubectl apply -f - <<EOF
 apiVersion: v1
@@ -129,13 +129,25 @@ metadata:
   namespace: flux-system
 data:
   username: $(echo -n "git" | base64 ${b64w})
-  password: $(echo -n "$GITHUB_TOKEN_READ" | base64 ${b64w})
+  password: $(echo -n "$GITHUB_TOKEN_WRITE" | base64 ${b64w})
 EOF
 
   # Create flux-system GitRepository and Kustomization
 
   # git pull
   mkdir -p $target_path/flux/flux-system
+
+  # If COMPANY_CA_CERT environmental variable is set, create a secret containing company root CA
+  if [ -n "$ADD_COMPANY_CA_CERTS" ]; then
+    cp $(local_or_global resources/company-ca-cert.yaml)  /tmp/certs.yaml 
+    security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain | sed 's/^/    /' >> /tmp/certs.yaml
+    cp /tmp/certs.yaml  $target_path/flux/company-ca-certs.yaml
+    git add $target_path/flux/company-ca-certs.yaml
+    export COMPANY_CA_CERTS_PATH="/company-ca-certs"
+  else
+    export COMPANY_CA_CERTS_PATH=""
+  fi
+
   cat $(local_or_global resources/gotk-sync.yaml) | envsubst > $target_path/flux/flux-system/gotk-sync.yaml
   git add $target_path/flux/flux-system/gotk-sync.yaml
   if [[ `git status --porcelain` ]]; then
