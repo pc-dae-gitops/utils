@@ -122,6 +122,7 @@ else
     mkdir -p $target_path/flux
     cp $(local_or_global resources/company-ca-cert.yaml)  /tmp/certs.yaml 
     security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain | sed 's/^/    /' >> /tmp/certs.yaml
+    cat resources/ca-cert.pem | sed 's/^/    /' >> /tmp/certs.yaml
     cp /tmp/certs.yaml  $target_path/flux/company-ca-certs.yaml
     git add $target_path/flux/company-ca-certs.yaml
     export COMPANY_CA_CERTS_PATH="company-ca-certs"
@@ -249,6 +250,20 @@ fi
 
 # Ensure that the git source is updated after pushing to the remote
 flux reconcile source git -n flux-system flux-system
+
+HARBOR_PASSWORD="$(date +%s | sha256sum | base64 | head -c 10)"
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: admin-password
+  namespace: harbor
+data:
+  adminPasswd: $(echo -n "$HARBOR_PASSWORD" | base64 ${b64w})
+EOF
+
+cat $(local_or_global resources/harbor-values.yaml) | envsubst > resources/harbor-values.yaml
+helm install harbor harbor/harbor --create-namespace --set-file resources/harbor-values.yaml
 
 # Wait for vault to start
 while ( true ); do
