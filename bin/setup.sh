@@ -13,7 +13,6 @@ function usage()
     echo "  --debug: emmit debugging information" >&2
     echo "  --flux-bootstrap: force flux bootstrap" >&2
     echo "  --flux-reset: unistall flux before reinstall" >&2
-    echo "  --cluster-type: the cluster type for Linux, only supports kind" >&2
     echo "  --no-wait: do not wait for flux to be ready" >&2
     echo "  --install: install software required by kind cluster deployment" >&2
 }
@@ -36,7 +35,6 @@ function args()
           "--install") install="--install";;
           "--flux-bootstrap") bootstrap=1;;
           "--flux-reset") reset=1;;
-          "--cluster-type") (( arg_index+=1 )); cluster_type="${arg_list[${arg_index}]}";;
                "-h") usage; exit;;
            "--help") usage; exit;;
                "-?") usage; exit;;
@@ -67,7 +65,8 @@ if [ -n "$debug_str" ]; then
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-  flux_suffix="-${cluster_type:-kind}"
+  cluster_type="kind"
+  flux_suffix="-${cluster_type}"
   b64w="-w 0"
 else
   flux_suffix="-mac"
