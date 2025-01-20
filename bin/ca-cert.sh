@@ -48,7 +48,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
   sudo mkdir -p /usr/local/share/ca-certificates/dae
   sudo chmod 755 /usr/local/share/ca-certificates/dae
   sudo cp CA.cer /usr/local/share/ca-certificates/dae
-  sudo chmod 644 /usr/local/share/ca-certificates/dae/CA.crt
+  sudo chmod 644 /usr/local/share/ca-certificates/dae/CA.cer
   sudo update-ca-certificates
 fi
 

@@ -74,6 +74,7 @@ else
   b64w=""
 fi
 
+export LOCAL_DNS="$local_dns"
 cat $(local_or_global resources/flux${flux_suffix}.yaml) | envsubst > $target_path/flux/flux.yaml
 git add $target_path/flux/flux.yaml
 if [[ `git status --porcelain` ]]; then
