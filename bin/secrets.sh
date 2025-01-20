@@ -89,3 +89,8 @@ vault kv put ${tls_skip} -mount=secrets monitoring-auth auth=$(htpasswd -nb prom
 vault kv put ${tls_skip} -mount=secrets monitoring-basic-auth-password password=${MONITORING_PASSWORD}
 
 echo "Monitoring password is: ${MONITORING_PASSWORD}" | tee $PWD/resources/prometheus-password.txt
+
+HARBOR_PASSWORD="$(date +%s | sha256sum | base64 | head -c 10)"
+vault kv put ${tls_skip} -mount=secrets harbor-admin-password adminPasswd=${HARBOR_PASSWORD}
+
+echo "Harbor password is: ${HARBOR_PASSWORD}" | tee $PWD/resources/harbor-password.txt

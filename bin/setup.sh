@@ -251,17 +251,6 @@ fi
 # Ensure that the git source is updated after pushing to the remote
 flux reconcile source git -n flux-system flux-system
 
-# HARBOR_PASSWORD="$(date +%s | sha256sum | base64 | head -c 10)"
-# kubectl apply -f - <<EOF
-# apiVersion: v1
-# kind: Secret
-# metadata:
-#   name: admin-password
-#   namespace: harbor
-# data:
-#   adminPasswd: $(echo -n "$HARBOR_PASSWORD" | base64 ${b64w})
-# EOF
-
 # cat $(local_or_global resources/harbor-values.yaml) | envsubst > resources/harbor.yaml
 # helm install harbor harbor/harbor --create-namespace --set-file resources/harbor.yaml
 
@@ -423,5 +412,16 @@ if [ "${ecr_repos:-}" == "true" ]; then
     git commit -m "Addresource descriptions and ci"
     git pull
     git push
+  fi
+fi
+
+if [ -n "$HARBOR_DNS" ]; then
+  cat $(local_or_global resources/harbor-ks.yaml) | envsubst > mgmt-cluster/flux/harbor.yaml
+  git add mgmt-cluster/flux/harbor.yaml
+  if [[ `git status --porcelain` ]]; then
+    git commit -m "update cluster config"
+    git pull
+    git push
+    flux reconcile source git flux-system
   fi
 fi
