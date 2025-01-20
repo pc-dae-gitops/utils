@@ -251,19 +251,19 @@ fi
 # Ensure that the git source is updated after pushing to the remote
 flux reconcile source git -n flux-system flux-system
 
-HARBOR_PASSWORD="$(date +%s | sha256sum | base64 | head -c 10)"
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: admin-password
-  namespace: harbor
-data:
-  adminPasswd: $(echo -n "$HARBOR_PASSWORD" | base64 ${b64w})
-EOF
+# HARBOR_PASSWORD="$(date +%s | sha256sum | base64 | head -c 10)"
+# kubectl apply -f - <<EOF
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: admin-password
+#   namespace: harbor
+# data:
+#   adminPasswd: $(echo -n "$HARBOR_PASSWORD" | base64 ${b64w})
+# EOF
 
-cat $(local_or_global resources/harbor-values.yaml) | envsubst > resources/harbor-values.yaml
-helm install harbor harbor/harbor --create-namespace --set-file resources/harbor-values.yaml
+# cat $(local_or_global resources/harbor-values.yaml) | envsubst > resources/harbor.yaml
+# helm install harbor harbor/harbor --create-namespace --set-file resources/harbor.yaml
 
 # Wait for vault to start
 while ( true ); do
