@@ -118,7 +118,7 @@ else
   fi
 
   # If COMPANY_CA_CERT environmental variable is set, create a secret containing company root CA
-  if [ -n "$ADD_COMPANY_CA_CERTS" ]; then
+  if [ -n "${ADD_COMPANY_CA_CERTS:-}" ]; then
     mkdir -p $target_path/flux
     cp $(local_or_global resources/company-ca-cert.yaml)  /tmp/certs.yaml 
     security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain | sed 's/^/    /' >> /tmp/certs.yaml
@@ -168,7 +168,15 @@ if [ -f resources/CA.cer ]; then
   echo "Certificate Authority already exists"
 else
   ca-cert.sh $debug_str
+  git add resources/CA.cer
+  if [[ `git status --porcelain` ]]; then
+    git commit -m "add CA certificate"
+    git pull
+    git push
+  fi
 fi
+
+
 
 # Install CA Certificate secret so Cert Manager can issue certificates using our CA
 
@@ -415,7 +423,7 @@ if [ "${ecr_repos:-}" == "true" ]; then
   fi
 fi
 
-if [ -n "$HARBOR_DNS" ]; then
+if [ -n "${HARBOR_DNS:-}" ]; then
   cat $(local_or_global resources/harbor-ks.yaml) | envsubst > mgmt-cluster/flux/harbor.yaml
   git add mgmt-cluster/flux/harbor.yaml
   if [[ `git status --porcelain` ]]; then
