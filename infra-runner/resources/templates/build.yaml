@@ -1,0 +1,6 @@
+repo: ${REPO:utils}
+branch: ${BRANCH:-}
+tag: ${TAG:-}
+token: ${GHT:-}
+script: ${BUILD_SCRIPT:-}
+args: "${BUILD_SCRIPT_ARGS:-}"
