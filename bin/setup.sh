@@ -80,7 +80,7 @@ if [[ `git status --porcelain` ]]; then
   git commit -m "Add flux.yaml"
   git pull
   git push
-fi
+fi 
 
 if [[ "$OSTYPE" == "linux"* ]]; then
   deploy-${cluster_type}.sh $debug_str --cluster-name $CLUSTER_NAME $install --mgmt
@@ -93,17 +93,17 @@ git config pull.rebase true
 
 # Install Flux if not present or force reinstall option set
 
-if [ $bootstrap -eq 0 ]; then
+if [[ $bootstrap -eq 0 ]]; then
   set +e
   kubectl get ns | grep flux-system
   bootstrap=$?
   set -e
 fi
 
-if [ $bootstrap -eq 0 ]; then
+if [[ $bootstrap -eq 0 ]]; then
   echo "flux-system namespace already. skipping bootstrap"
 else
-  if [ $reset -eq 1 ]; then
+  if [[ $reset -eq 1 ]]; then
     echo "uninstalling flux"
     flux uninstall --silent --keep-namespace
     if [ -e $target_path/flux/flux-system ]; then
