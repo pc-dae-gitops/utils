@@ -43,6 +43,6 @@ args "$@"
 
 source ${secrets_file}
 
-vault kv put -mount=secrets github-runner-auth github_app_id=${runner_app_id} github_app_installation_id=${runner_app_installation_id} github_app_private_key=${runner_app_private_key}
-vault kv put -mount=secrets github-reader-auth github_app_id=${reader_app_id} github_app_installation_id=${reader_app_installation_id} github_app_private_key=${reader_app_private_key}
-vault kv put -mount=secrets github-updater-auth github_app_id=${updater_app_id} github_app_installation_id=${updater_app_installation_id} github_app_private_key=${updater_app_private_key}
+vault kv put -mount=secrets github-runner-auth github_app_id=${runner_app_id} github_app_installation_id=${runner_app_installation_id} github_app_private_key="${runner_app_private_key}"
+vault kv put -mount=secrets github-reader-auth github_app_id=${reader_app_id} github_app_installation_id=${reader_app_installation_id} github_app_private_key="${reader_app_private_key}"
+vault kv put -mount=secrets github-updater-auth github_app_id=${updater_app_id} github_app_installation_id=${updater_app_installation_id} github_app_private_key="${updater_app_private_key}"
