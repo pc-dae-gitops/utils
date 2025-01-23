@@ -171,8 +171,6 @@ else
   fi
 fi
 
-
-
 # Install CA Certificate secret so Cert Manager can issue certificates using our CA
 
 kubectl apply -f ${config_dir}/mgmt-cluster/addons/cert-manager/namespace.yaml

@@ -45,11 +45,11 @@ openssl genrsa -out CA.key 4096
 openssl req -x509 -new -nodes -key CA.key -subj "/CN=paulc" -days 3650 -reqexts v3_req -extensions v3_ca -out CA.cer
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-  sudo mkdir -p /usr/local/share/ca-certificates/dae
-  sudo chmod 755 /usr/local/share/ca-certificates/dae
-  sudo cp CA.cer /usr/local/share/ca-certificates/dae
-  sudo chmod 644 /usr/local/share/ca-certificates/dae/CA.cer
+  sudo cp CA.cer /usr/local/share/ca-certificates/CA.crt
+  sudo chmod 644 /usr/local/share/ca-certificates/CA.crt
   sudo update-ca-certificates
+else
+  sudo security add-trusted-cert -d -r trustRoot -p ssl -p basic -k /Library/Keychains/System.keychain CA.cer
 fi
 
 popd >/dev/null
