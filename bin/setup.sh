@@ -396,9 +396,9 @@ kubectl rollout restart deployment -n external-secrets external-secrets
 # Wait for dex to start:
 kubectl wait --timeout=5m --for=condition=Ready kustomization/dex -n flux-system
 
-set +e
-vault-oidc-config.sh $debug_str
-set -e
+# set +e
+# vault-oidc-config.sh $debug_str
+# set -e
 
 if [ "${aws:-}" == "true" ]; then
   if [ "$wait" == "1" ]; then
@@ -421,19 +421,31 @@ fi
 
 if [ -n "${HARBOR_DNS:-}" ]; then
   cat $(local_or_global resources/harbor-ks.yaml) | envsubst > mgmt-cluster/flux/harbor.yaml
-  git add mgmt-cluster/flux/harbor.yaml
-  if [[ `git status --porcelain` ]]; then
-    git commit -m "update cluster config"
-    git pull
-    git push
-    flux reconcile source git flux-system
-  fi
+else
+  rm -rf mgmt-cluster/flux/harbor.yaml
+fi
+
+git add mgmt-cluster/flux/harbor.yaml
+if [[ `git status --porcelain` ]]; then
+  git commit -m "update harbor config"
+  git pull
+  git push
+  flux reconcile source git flux-system
 fi
 
 gha_repo_list=$(local_or_global resources/gha-repos.txt)
 for github_org_repo in $(cat $gha_repo_list); do
   mkdir -p mgmt-cluster/flux/gha
+  cp $(local_or_global resources/gha-controller.yaml)  mgmt-cluster/flux/gha
   export GITHUB_ORG=$(echo $github_org_repo | cut -f1 -d/)
   export GITHUB_REPO=$(echo $github_org_repo | cut -f2 -d/)
   cat $(local_or_global resources/gha-runner.yaml) | envsubst > mgmt-cluster/flux/gha/$GITHUB_ORG-$GITHUB_REPO.yaml
 done
+
+git add mgmt-cluster/flux/gha
+if [[ `git status --porcelain` ]]; then
+  git commit -m "update GHA runners config"
+  git pull
+  git push
+  flux reconcile source git flux-system
+fi
