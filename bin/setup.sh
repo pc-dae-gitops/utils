@@ -433,14 +433,19 @@ if [[ `git status --porcelain` ]]; then
   flux reconcile source git flux-system
 fi
 
-gha_repo_list=$(local_or_global resources/gha-repos.txt)
-for github_org_repo in $(cat $gha_repo_list); do
+gha_repo_list=resources/gha-repos.txt
+if [ -e "$gha_repo_list" ]; then
   mkdir -p mgmt-cluster/flux/gha
   cp $(local_or_global resources/gha-controller.yaml)  mgmt-cluster/flux/gha
-  export GITHUB_ORG=$(echo $github_org_repo | cut -f1 -d/)
-  export GITHUB_REPO=$(echo $github_org_repo | cut -f2 -d/)
-  cat $(local_or_global resources/gha-runner.yaml) | envsubst > mgmt-cluster/flux/gha/$GITHUB_ORG-$GITHUB_REPO.yaml
-done
+  gha-secrets.sh --secrets resources/gha-secrets.sh
+  for github_org_repo in $(cat $gha_repo_list); do
+    export GITHUB_ORG=$(echo $github_org_repo | cut -f1 -d/)
+    export GITHUB_REPO=$(echo $github_org_repo | cut -f2 -d/)
+    cat $(local_or_global resources/gha-runner.yaml) | envsubst > mgmt-cluster/flux/gha/$GITHUB_ORG-$GITHUB_REPO.yaml
+  done
+else
+  rm -rf mgmt-cluster/flux/gha
+fi
 
 git add mgmt-cluster/flux/gha
 if [[ `git status --porcelain` ]]; then
