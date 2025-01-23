@@ -393,6 +393,8 @@ else
   fi
 fi
 
+kubectl rollout restart deployment -n external-secrets external-secrets
+
 # Wait for dex to start:
 kubectl wait --timeout=5m --for=condition=Ready kustomization/dex -n flux-system
 
@@ -431,8 +433,9 @@ if [ -n "${HARBOR_DNS:-}" ]; then
 fi
 
 gha_repo_list=$(local_or_global resources/gha-repos.txt)
-for gha_org_repo in $(cat $gha_repo_list); do
-  export GHA_ORG=$(echo $GHA_REPO | cut -f1 -d/)
-  export GHA_REPO=$(echo $GHA_REPO | cut -f2 -d/)
-  cat $(local_or_global resources/gha-repo.yaml) | envsubst | kubectl apply -f -
+for github_org_repo in $(cat $gha_repo_list); do
+  mkdir -p mgmt-cluster/flux/gha
+  export GITHUB_ORG=$(echo $github_org_repo | cut -f1 -d/)
+  export GITHUB_REPO=$(echo $github_org_repo | cut -f2 -d/)
+  cat $(local_or_global resources/gha-runner.yaml) | envsubst > mgmt-cluster/flux/gha/$GITHUB_ORG-$GITHUB_REPO.yaml
 done
