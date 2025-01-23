@@ -58,7 +58,7 @@ sudo iptables -F
 sudo systemctl restart containerd
 
 sleep 5
-sudo -E kubeadm init --ignore-preflight-errors=NumCPU --pod-network-cidr "10.10.0.0/16"  --service-cidr "10.11.0.0/16" --kubernetes-version v1.27.0 --apiserver-cert-extra-sans $hostname
+sudo -E kubeadm init --ignore-preflight-errors=NumCPU --pod-network-cidr "10.10.0.0/16"  --service-cidr "10.11.0.0/16" --kubernetes-version v1.32.0 --apiserver-cert-extra-sans $hostname
 
 mkdir -p $HOME/.kube
 sudo cp -rf /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -84,7 +84,8 @@ do
   set +e
   # kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
   # kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
-  kubectl apply -f /tmp/kubeadm-leafs/weave-daemonset-k8s.yaml
+  # kubectl apply -f $SCRIPT_DIR/../kubeadm-leafs/weave-daemonset-k8s.yaml
+  cilium install --version 1.16.6
   ret=$?
   set -e
   if [ $ret -eq 0 ]; then
@@ -100,19 +101,3 @@ kubectl get pods -A
 sudo systemctl --no-pager status kubelet -l
 
 cat $KUBECONFIG | sed s%https://.*:6443%https://$hostname:6443%g > /tmp/kubeconfig
-
-while [ 1 -eq 1 ]
-do
-  set +e
-  echo "Waiting for coredns to be available"
-  kubectl wait --for=condition=Available --timeout=120s -n kube-system deployment.apps/coredns
-  ret=$?
-  set -e
-  if [ $ret -eq 0 ]; then
-    break
-  fi
-  sleep 1
-done
-
-flux --version
-flux bootstrap github --owner $GITHUB_MGMT_ORG --repository $GITHUB_MGMT_REPO --path kubeadm-leafs/$hostname/flux

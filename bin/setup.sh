@@ -65,8 +65,7 @@ if [ -n "$debug_str" ]; then
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-  cluster_type="kind"
-  flux_suffix="-${cluster_type}"
+  flux_suffix="-mac"
   b64w="-w 0"
 else
   flux_suffix="-mac"
@@ -81,10 +80,6 @@ if [[ `git status --porcelain` ]]; then
   git pull
   git push
 fi 
-
-if [[ "$OSTYPE" == "linux"* ]]; then
-  deploy-${cluster_type}.sh $debug_str --cluster-name $CLUSTER_NAME $install --mgmt
-fi
 
 echo "Waiting for cluster to be ready"
 kubectl wait --for=condition=Available  -n kube-system deployment coredns
@@ -199,7 +194,8 @@ export CA_CERT="$(cat resources/CA.cer)"
 for nameSpace in $(cat $namespace_list); do
   export nameSpace
   cat $(local_or_global resources/local-ca-ns.yaml) |envsubst | kubectl apply -f -
-  kubectl create configmap local-ca -n ${nameSpace} --from-file=resources/CA.cer --dry-run=client -o yaml | kubectl apply -f -
+  kubectl create configmap local-ca -n ${nameSpace} --from-file=resources/CA.cer --dry-run=client -o yaml >/tmp/ca.yaml
+  kubectl apply -f /tmp/ca.yaml
 done
 
 if [ "$wait" == "1" ]; then
