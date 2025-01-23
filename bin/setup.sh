@@ -446,7 +446,7 @@ if [ -e "$gha_repo_list" ]; then
   add=true
   mkdir -p mgmt-cluster/flux/gha
   cp $(local_or_global resources/gha-controller.yaml)  mgmt-cluster/flux/gha
-  gha-secrets.sh --secrets resources/gha-secrets.sh
+  gha-secrets.sh  $debug_str --secrets resources/gha-secrets.sh
   for github_org_repo in $(cat $gha_repo_list); do
     export GITHUB_ORG=$(echo $github_org_repo | cut -f1 -d/)
     export GITHUB_REPO=$(echo $github_org_repo | cut -f2 -d/)
