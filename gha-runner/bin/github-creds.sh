@@ -12,7 +12,7 @@ function usage()
 
 function args() {
   debug=""
-  type="${type}"
+  type="reader"
 
   arg_list=( "$@" )
   arg_count=${#arg_list[@]}
