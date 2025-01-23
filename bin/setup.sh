@@ -433,3 +433,10 @@ if [ -n "${HARBOR_DNS:-}" ]; then
     flux reconcile source git flux-system
   fi
 fi
+
+gha_repo_list=$(local_or_global resources/gha-repos.txt)
+for gha_org_repo in $(cat $gha_repo_list); do
+  export GHA_ORG=$(echo $GHA_REPO | cut -f1 -d/)
+  export GHA_REPO=$(echo $GHA_REPO | cut -f2 -d/)
+  cat $(local_or_global resources/gha-repo.yaml) | envsubst | kubectl apply -f -
+done
