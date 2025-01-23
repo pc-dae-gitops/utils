@@ -419,22 +419,31 @@ if [ "${ecr_repos:-}" == "true" ]; then
   fi
 fi
 
+add=""
 if [ -n "${HARBOR_DNS:-}" ]; then
   cat $(local_or_global resources/harbor-ks.yaml) | envsubst > mgmt-cluster/flux/harbor.yaml
+  add=true
 else
-  rm -rf mgmt-cluster/flux/harbor.yaml
+  if [ -e mgmt-cluster/flux/harbor.yaml ]; then
+    rm -rf mgmt-cluster/flux/harbor.yaml
+    add=true
+  fi
 fi
 
-git add mgmt-cluster/flux/harbor.yaml
-if [[ `git status --porcelain` ]]; then
-  git commit -m "update harbor config"
-  git pull
-  git push
-  flux reconcile source git flux-system
+if [ -n "$add" ]; then
+  git add mgmt-cluster/flux/harbor.yaml
+  if [[ `git status --porcelain` ]]; then
+    git commit -m "update harbor config"
+    git pull
+    git push
+    flux reconcile source git flux-system
+  fi
 fi
 
+add=""
 gha_repo_list=resources/gha-repos.txt
 if [ -e "$gha_repo_list" ]; then
+  add=true
   mkdir -p mgmt-cluster/flux/gha
   cp $(local_or_global resources/gha-controller.yaml)  mgmt-cluster/flux/gha
   gha-secrets.sh --secrets resources/gha-secrets.sh
@@ -444,13 +453,18 @@ if [ -e "$gha_repo_list" ]; then
     cat $(local_or_global resources/gha-runner.yaml) | envsubst > mgmt-cluster/flux/gha/$GITHUB_ORG-$GITHUB_REPO.yaml
   done
 else
-  rm -rf mgmt-cluster/flux/gha
+  if [ -d mgmt-cluster/flux/gha ]; then
+    rm -rf mgmt-cluster/flux/gha
+    add=true
+  fi
 fi
 
-git add mgmt-cluster/flux/gha
-if [[ `git status --porcelain` ]]; then
-  git commit -m "update GHA runners config"
-  git pull
-  git push
-  flux reconcile source git flux-system
+if [ -n "$add" ]; then
+  git add mgmt-cluster/flux/gha
+  if [[ `git status --porcelain` ]]; then
+    git commit -m "update GHA runners config"
+    git pull
+    git push
+    flux reconcile source git flux-system
+  fi
 fi
